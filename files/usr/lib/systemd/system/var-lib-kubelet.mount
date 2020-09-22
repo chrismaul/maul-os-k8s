@@ -1,0 +1,12 @@
+[Unit]
+Description=Kubelet Directory
+After=mount-modules.service
+
+[Mount]
+What=/dev/disk/by-label/k8s
+Where=/var/lib/kubelet
+Type=btrfs
+Options=subvol=_var-lib-kubelet,defaults,relatime
+
+[Install]
+WantedBy=local-fs.target

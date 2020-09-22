@@ -1,0 +1,12 @@
+[Unit]
+Description=kubernetes directory Directory
+After=mount-modules.service
+
+[Mount]
+What=/dev/disk/by-label/k8s
+Where=/etc/kubernetes
+Type=btrfs
+Options=subvol=_etc-kubernetes,defaults,relatime
+
+[Install]
+WantedBy=local-fs.target

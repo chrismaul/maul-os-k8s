@@ -1,0 +1,10 @@
+NAME="Maul OS K8S"
+PRETTY_NAME="Maul OS K8S"
+ID=maul-os-k8s
+BUILD_ID=%VERS%
+ANSI_COLOR="38;2;23;147;209"
+HOME_URL="https://www.archlinux.org/"
+DOCUMENTATION_URL="https://wiki.archlinux.org/"
+SUPPORT_URL="https://bbs.archlinux.org/"
+BUG_REPORT_URL="https://bugs.archlinux.org/"
+LOGO=archlinux

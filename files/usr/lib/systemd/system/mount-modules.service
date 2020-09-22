@@ -1,0 +1,11 @@
+[Unit]
+Description=Setup up modules
+Before=systemd-modules-load.service local-fs.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/mount-modules-dir
+
+[Install]
+WantedBy=sysinit.target

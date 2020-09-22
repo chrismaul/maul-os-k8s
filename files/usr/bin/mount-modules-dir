@@ -1,0 +1,11 @@
+#!/bin/bash
+MOD_VERS=$(uname -r)
+MOD_HASH=$(grep -o "mod_hash.$MOD_VERS=[a-z0-9A-Z]*" /proc/cmdline | cut -d = -f 2)
+source /etc/os-release
+echo "Using mod_hash $MOD_HASH"
+mkdir -p /modules/$MOD_VERS
+/usr/lib/systemd/systemd-veritysetup attach modules \
+  "/dev/root/modules-$BUILD_ID-$MOD_VERS" "/dev/root/modules-$BUILD_ID-$MOD_VERS-verity" \
+  "$MOD_HASH"
+
+mount /dev/mapper/modules /modules/$MOD_VERS -o ro
