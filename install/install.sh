@@ -96,6 +96,7 @@ then
       umount $TMP_ROOT/new || true
       sleep 1
     done
+    umount /host/usr
     while [ -n "$(dmsetup table | grep "^root.* verity " | \
       cut -d ':' -f 1 | grep -v root-$BUILD_ID)" ] ;
     do

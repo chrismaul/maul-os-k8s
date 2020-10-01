@@ -1,11 +1,24 @@
-#!/bin/bash
+#!/bin/bash -xe
+
+if [ -z "$1" ]
+then
+  ROOT=/
+else
+  ROOT=$1
+fi
+mount
 MOD_VERS=$(uname -r)
 MOD_HASH=$(grep -o "mod_hash.$MOD_VERS=[a-z0-9A-Z]*" /proc/cmdline | cut -d = -f 2)
-source /etc/os-release
+source $ROOT/usr/lib/os-release
 echo "Using mod_hash $MOD_HASH"
-mkdir -p /modules/$MOD_VERS
-/usr/lib/systemd/systemd-veritysetup attach modules \
-  "/dev/root/modules-$BUILD_ID-$MOD_VERS" "/dev/root/modules-$BUILD_ID-$MOD_VERS-verity" \
-  "$MOD_HASH"
-
-mount /dev/mapper/modules /modules/$MOD_VERS -o ro
+mkdir -p $ROOT/modules/$MOD_VERS
+if ! [ -e "/dev/mapper/modules" ]
+then
+  /usr/lib/systemd/systemd-veritysetup attach modules \
+    "/dev/root/modules-$BUILD_ID-$MOD_VERS" "/dev/root/modules-$BUILD_ID-$MOD_VERS-verity" \
+    "$MOD_HASH"
+fi
+if ! findmnt /tmp $ROOT/modules/$MOD_VERS
+then
+  mount /dev/mapper/modules $ROOT/modules/$MOD_VERS -o ro
+fi

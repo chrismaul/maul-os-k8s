@@ -143,6 +143,7 @@ RUN echo etc-cni.mount \
     cloud-init.service \
     cloud-final.service \
     coldplug.service \
+    mount-modules.service \
     zfs-import-scan.service \
   | xargs -n 1 systemctl enable && \
   echo cloud-init-local.service \

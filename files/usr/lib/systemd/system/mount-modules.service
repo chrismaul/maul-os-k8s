@@ -1,11 +1,11 @@
 [Unit]
 Description=Setup up modules
-Before=systemd-modules-load.service local-fs.target
+After=systemd-volatile-root.service
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/bin/mount-modules-dir
+ExecStart=/usr/bin/mount-modules-dir /sysroot
 
 [Install]
 WantedBy=sysinit.target

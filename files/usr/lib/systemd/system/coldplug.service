@@ -2,8 +2,6 @@
 Description=udev Coldplug all Devices
 Documentation=man:udev(7) man:systemd-udevd.service(8)
 ConditionPathIsReadWrite=/sys
-After=mount-modules.service
-Wants=mount-modules.service
 
 [Service]
 Type=oneshot
