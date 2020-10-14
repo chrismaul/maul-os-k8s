@@ -1,0 +1,36 @@
+name: Build Image
+
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron: 0 0 * * 0
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Bump version and push tag
+        if: github.event_name == 'schedule' || github.event_name == 'push'
+        uses: mathieudutour/github-tag-action@v4.5
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prep
+        run: |
+          git fetch --all --tags
+          TAG="$(git tag -l --points-at HEAD)"
+          TAG=${TAG:-v1.4.0}
+          echo ::set-output name=docker_tag::${TAG}-$(date +%Y%m%d)-01
+      - name: Docker push
+        uses: docker/build-push-action@v1.1.1
+        with:
+          username: maulc
+          password: ${{ secrets.DOCKER_TOKEN }}
+          repository: maulc/maul-os-k8s
+          tags: ${{ steps.prep.outputs.docker_tag }}
+          always_pull: true
+          add_git_labels: true
