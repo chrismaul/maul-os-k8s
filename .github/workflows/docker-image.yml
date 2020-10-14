@@ -31,6 +31,7 @@ jobs:
           username: maulc
           password: ${{ secrets.DOCKER_TOKEN }}
           repository: maulc/maul-os-k8s
+          build_args: VERS=${{ steps.prep.outputs.docker_tag }}
           tags: ${{ steps.prep.outputs.docker_tag }}
           always_pull: true
           add_git_labels: true
