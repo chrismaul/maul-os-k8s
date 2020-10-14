@@ -1,12 +1,14 @@
 [Unit]
 Description=containerd Directory
 Before=containerd.service
+After=mnt-data.mount
+Requires=mnt-data.mount
 
 [Mount]
-What=/dev/disk/by-label/k8s
+What=/mnt/data/var/lib/containerd
 Where=/var/lib/containerd
-Type=btrfs
-Options=subvol=_var-lib-containerd,defaults,relatime
+Type=none
+Options=bind
 
 [Install]
 WantedBy=containerd.service

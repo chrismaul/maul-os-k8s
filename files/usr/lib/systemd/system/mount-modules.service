@@ -1,6 +1,7 @@
 [Unit]
 Description=Setup up modules
 After=systemd-volatile-root.service
+AssertPathExists=/etc/initrd-release
 
 [Service]
 Type=oneshot

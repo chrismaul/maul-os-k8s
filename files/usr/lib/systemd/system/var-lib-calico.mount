@@ -1,12 +1,14 @@
 [Unit]
 Description=cni Directory
 Before=kubelet.service
+After=mnt-data.mount
+Requires=mnt-data.mount
 
 [Mount]
-What=/dev/disk/by-label/k8s
+What=/mnt/data/var/lib/calico
 Where=/var/lib/calico
-Type=btrfs
-Options=subvol=_var-lib-calico,defaults,relatime
+Type=none
+Options=bind
 
 [Install]
 WantedBy=kubelet.service

@@ -1,12 +1,14 @@
 [Unit]
 Description=kubernetes directory Directory
 Before=kubelet.service
+After=mnt-data.mount
+Requires=mnt-data.mount
 
 [Mount]
-What=/dev/disk/by-label/k8s
+What=/mnt/data/etc/kubernetes
 Where=/etc/kubernetes
-Type=btrfs
-Options=subvol=_etc-kubernetes,defaults,relatime
+Type=none
+Options=bind
 
 [Install]
 WantedBy=kubelet.service

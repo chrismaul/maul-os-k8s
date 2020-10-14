@@ -1,0 +1,8 @@
+[Unit]
+Description=cni Directory
+
+[Mount]
+What=/dev/disk/by-label/data
+Where=/mnt/data
+Type=auto
+Options=defaults,relatime

@@ -1,12 +1,14 @@
 [Unit]
 Description=kubernetes directory Directory
 Before=kubelet.service
+After=mnt-data.mount
+Requires=mnt-data.mount
 
 [Mount]
-What=/dev/disk/by-label/k8s
+What=/mnt/data/etc/cni
 Where=/etc/cni
-Type=btrfs
-Options=subvol=_etc-cni,defaults,relatime
+Type=none
+Options=bind
 
 [Install]
 WantedBy=kubelet.service

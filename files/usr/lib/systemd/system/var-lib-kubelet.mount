@@ -1,12 +1,14 @@
 [Unit]
 Description=Kubelet Directory
 Before=kubelet.service
+After=mnt-data.mount
+Requires=mnt-data.mount
 
 [Mount]
-What=/dev/disk/by-label/k8s
+What=/mnt/data/var/lib/kubelet
 Where=/var/lib/kubelet
-Type=btrfs
-Options=subvol=_var-lib-kubelet,defaults,relatime
+Type=none
+Options=bind
 
 [Install]
 WantedBy=kubelet.service

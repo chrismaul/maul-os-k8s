@@ -1,6 +1,10 @@
 #!/bin/bash -ex
 
-source /output/os-release
+# make install directory `mkdir -p etc/{cni,kubernetes} var/lib/{calico,containerd,etcd,kubelet}`
+
+BUILD_DIR=${BUILD_DIR:-/output}
+
+source $BUILD_DIR/os-release
 
 if egrep -q "BUILD_ID=[\"]?$BUILD_ID[\"]?" /host/usr/lib/os-release
 then
@@ -10,11 +14,11 @@ fi
 VG_NAME=${VG_NAME:-root}
 HOST_ROOT=/host
 
-SRC=/output/root.squashfs
-SRC_VERITY=/output/root.verity
-KERNEL=/output/kernel.efi
+SRC=$BUILD_DIR/root.squashfs
+SRC_VERITY=$BUILD_DIR/root.verity
+KERNEL=$BUILD_DIR/kernel.efi
 
-if ! [ -e /dev/root/maul-os-$BUILD_ID ]
+if ! [ -e /dev/$VG_NAME/maul-os-$BUILD_ID ]
 then
 
   FILESIZE=$(stat --printf="%s" $SRC)
@@ -32,26 +36,33 @@ then
 
 fi
 
-if ! [ -e "$HOST_ROOT/boot/EFI" ]
+if [ -z "$BOOT_DIR" ]
 then
-  mkdir -p $HOST_ROOT/boot
-  mount LABEL=BOOT $HOST_ROOT/boot
+  export BOOT_DIR=$HOST_ROOT/boot
 fi
 
-cp -v $KERNEL $HOST_ROOT/boot/efi/Linux/maul-os-$BUILD_ID.efi
+if ! findmnt $BOOT_DIR > /dev/null
+then
+  mkdir -p $BOOT_DIR
+  mount LABEL=BOOT $BOOT_DIR
+fi
 
-for MOD_LOC in /output/modules_*_squashfs
+mkdir -p $BOOT_DIR/efi/Linux
+
+cp -v $KERNEL $BOOT_DIR/efi/Linux/maul-os-$BUILD_ID.efi
+
+for MOD_LOC in $BUILD_DIR/modules_*_squashfs
 do
   MOD_VERS=$(echo $MOD_LOC | cut -d _ -f 2)
-  if ! [ -e "/dev/root/modules-${BUILD_ID}-$MOD_VERS" ]
+  if ! [ -e "/dev/$VG_NAME/modules-${BUILD_ID}-$MOD_VERS" ]
   then
     MOD_SIZE=$(stat --printf="%s" $MOD_LOC)
-    MOD_HASH_SIZE=$(stat --printf="%s" /output/modules_${MOD_VERS}_verity)
+    MOD_HASH_SIZE=$(stat --printf="%s" $BUILD_DIR/modules_${MOD_VERS}_verity)
     lvcreate -Wy -y -n modules-${BUILD_ID}-$MOD_VERS -L ${MOD_SIZE}B $VG_NAME
     lvcreate -Wy -y -n modules-${BUILD_ID}-${MOD_VERS}-verity -L ${MOD_HASH_SIZE}B $VG_NAME
 
     dd if=$MOD_LOC of=/dev/$VG_NAME/modules-${BUILD_ID}-$MOD_VERS bs=4M
-    dd if=/output/modules_${MOD_VERS}_verity of=/dev/$VG_NAME/modules-${BUILD_ID}-${MOD_VERS}-verity bs=1M
+    dd if=$BUILD_DIR/modules_${MOD_VERS}_verity of=/dev/$VG_NAME/modules-${BUILD_ID}-${MOD_VERS}-verity bs=1M
   fi
 done
 
@@ -67,7 +78,7 @@ then
         /dev/$VG_NAME/maul-os-$BUILD_ID \
         root-$BUILD_ID \
         /dev/$VG_NAME/maul-os-$BUILD_ID-verity \
-        $(cat /output/root.verity-info.txt | grep "Root hash:" | cut -f 2)
+        $(cat $BUILD_DIR/root.verity-info.txt | grep "Root hash:" | cut -f 2)
     fi
     mkdir -p $TMP_ROOT/{new,old}
     if grep -q " $TMP_ROOT/new " /proc/mounts
@@ -104,6 +115,6 @@ then
         cut -d ':' -f 1 | grep -v root-$BUILD_ID | \
       xargs -n 1 veritysetup close || sleep 1
     done
-    mount -N /proc/1/ns/mnt --make-shared /
+    mount -N /proc/1/ns/mnt --make-rshared /
   fi
 fi

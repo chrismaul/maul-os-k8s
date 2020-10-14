@@ -1,6 +1,7 @@
 FROM archlinux/base AS root
 ARG ARCH_MIRROR=http://mirror.math.princeton.edu/pub/archlinux
-RUN sed -i "1s|^|Server = $ARCH_MIRROR/\$repo/os/\$arch\n|" /etc/pacman.d/mirrorlist
+RUN sed -i "1s|^|Server = $ARCH_MIRROR/\$repo/os/\$arch\n|" /etc/pacman.d/mirrorlist && \
+  pacman -Syyu --needed --noconfirm awk
 
 RUN echo "[archzfs]" >> /etc/pacman.conf && \
   echo "Server = https://archzfs.com/\$repo/\$arch" >> /etc/pacman.conf && \
@@ -67,7 +68,9 @@ RUN pacman -Syyu --needed --noconfirm \
   multipath-tools \
   btrfs-progs \
   mtools \
-  busybox
+  conntrack-tools \
+  bpf
+
 
 RUN mkdir -p /tmp/download
 
@@ -181,10 +184,7 @@ RUN mv /usr/lib/modules /modules && \
     cd /modules/${MOD_DIR} && \
     mksquashfs * /output/modules_${MOD_DIR}_squashfs && \
     veritysetup format /output/modules_${MOD_DIR}_squashfs /output/modules_${MOD_DIR}_verity > /output/modules_${MOD_DIR}_verity-info.txt; \
-  done && \
-  mkdir -p /usr/lib/systemd/system/systemd-modules-load.service.wants && \
-  ln -s /usr/lib/systemd/system/mount-modules.service /usr/lib/systemd/system/systemd-modules-load.service.wants/mount-modules.service && \
-  ln -s /usr/lib/systemd/system/mount-modules.service /usr/lib/systemd/system/multi-user.target.wants/mount-modules.service
+  done
 
 RUN mksquashfs usr etc /output/root.squashfs && \
   veritysetup format /output/root.squashfs /output/root.verity > /output/root.verity-info.txt
