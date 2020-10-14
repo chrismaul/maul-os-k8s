@@ -20,7 +20,13 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
       - name: Prep
+        env:
+          DBCRT: ${{ secrets.DBCRT }}
+          DBKEY: ${{ secrets.DBKEY }}
         run: |
+          mkdir -p secureboot
+          echo $DBCRT | base64 --decode > secureboot/db.crt
+          echo $DBKEY | base64 --decode > secureboot/db.key
           git fetch --all --tags
           TAG="$(git tag -l --points-at HEAD)"
           TAG=${TAG:-v1.4.0}
