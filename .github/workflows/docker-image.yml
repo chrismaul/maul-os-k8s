@@ -61,3 +61,5 @@ jobs:
             --label "org.opencontainers.image.revision=${SHA}" \
             .
           docker push maulc/maul-os-k8s:$VERS
+          docker tag maulc/maul-os-k8s:$VERS maulc/maul-os-k8s:latest
+          docker push maulc/maul-os-k8s:latest
