@@ -69,7 +69,8 @@ RUN pacman -Syyu --needed --noconfirm \
   btrfs-progs \
   mtools \
   conntrack-tools \
-  bpf
+  bpf \
+  ipmitool
 
 
 RUN mkdir -p /tmp/download

@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 
-# make install directory `mkdir -p etc/{cni,kubernetes} var/lib/{calico,containerd,etcd,kubelet}`
+# make install directory `mkdir -p etc/{cni,kubernetes} var/lib/{calico,containerd,etcd,kubelet}` var/lib/kubelet/usr
 
 BUILD_DIR=${BUILD_DIR:-/output}
 
@@ -117,4 +117,22 @@ then
     done
     mount -N /proc/1/ns/mnt --make-rshared /
   fi
+fi
+
+if [ -n "$KEEP_OLD" ]
+then
+  DEVICES=""
+  for DEV_TYPE in modules maul-os
+  do
+    DEVICES="$DEVICES $(ls /dev/$VG_NAME/$DEV_TYPE-* | grep -v '-verity$' | sort -rV | tail -n +$KEEP_OLD)"
+    DEVICES="$DEVICES $(ls /dev/$VG_NAME/$DEV_TYPE-* | grep '-verity$' | sort -rV | tail -n +$KEEP_OLD)"
+  done
+  for i in $DEVICES
+  do
+    lvremove -fy $i
+  done
+  for KERNEL in $(ls $BOOT_DIR/EFI/Linux/maul-os-* | sort -rV | tail -n +$KEEP_OLD)
+  do
+    rm $KERNEL
+  done
 fi
